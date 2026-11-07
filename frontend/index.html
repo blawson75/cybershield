@@ -1,10 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>CyberShield</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberShield - Data Broker Monitoring</title>
+<link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <h1>🔒 CyberShield</h1>
-    <p>Data Broker Monitoring Platform</p>
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <a href="/" class="brand">🔒 CyberShield</a>
+      <div class="nav-links">
+        <a href="#how">How It Works</a>
+        <a href="#brokers">Brokers</a>
+        <a href="/admin.html" class="nav-admin">Admin</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="hero-copy">
+        <h1>Know who has your data.<br><span class="accent">Take it back.</span></h1>
+        <p>CyberShield scans 70+ data brokers, finds where your personal information lives, and helps you request removal. Your digital footprint, finally under control.</p>
+        <div class="hero-cta">
+          <button id="scanBtn" class="btn-primary">Run Free Scan</button>
+          <a href="#how" class="btn-link">Learn more →</a>
+        </div>
+        <div class="hero-stats" id="stats"></div>
+      </div>
+      <div class="hero-visual">
+        <div class="shield-card">
+          <div class="shield-ring">🛡️</div>
+          <div class="shield-label">Your data is protected</div>
+          <div class="shield-bar"><div id="shieldFill" class="shield-bar-fill" style="width:0%"></div></div>
+          <div class="shield-pct" id="shieldPct">0%</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="scanResult" class="scan-section container">
+    <div class="scan-card">
+      <h2>Scan Results</h2>
+      <div id="scanContent">Enter your email below to begin.</div>
+      <form id="scanForm" class="scan-form">
+        <input type="email" id="scanEmail" placeholder="you@example.com" required>
+        <button type="submit" class="btn-primary">Scan</button>
+      </form>
+      <div id="scanStatus" class="scan-status"></div>
+    </div>
+  </section>
+
+  <section id="how" class="how-section container">
+    <h2>How It Works</h2>
+    <div class="how-grid">
+      <div class="how-step"><span class="step-num">1</span><h3>Scan</h3><p>We check 70+ data brokers for your personal information.</p></div>
+      <div class="how-step"><span class="step-num">2</span><h3>Discover</h3><p>See exactly what's exposed — addresses, phone numbers, relatives, more.</p></div>
+      <div class="how-step"><span class="step-num">3</span><h3>Remove</h3><p>Submit opt-out requests and watch your footprint shrink.</p></div>
+    </div>
+  </section>
+
+  <section id="brokers" class="brokers-section container">
+    <h2>Monitored Data Brokers <span id="brokerCount" class="count"></span></h2>
+    <div id="brokerGrid" class="broker-grid"></div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <p>🔒 CyberShield — Data broker monitoring platform.</p>
+    </div>
+  </footer>
+
+  <script src="/js/app.js"></script>
 </body>
 </html>
