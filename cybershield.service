@@ -1,0 +1,18 @@
+[Unit]
+Description=CyberShield - Data Broker Monitoring Platform
+After=network.target
+
+[Service]
+Type=simple
+User=cybershield
+Group=cybershield
+WorkingDirectory=/opt/cybershield
+Environment="PYTHONUNBUFFERED=1"
+ExecStart=/opt/cybershield/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:5000 backend.app:app
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
