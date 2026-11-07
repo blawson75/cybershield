@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 .env
 *.log
+# Whitelist is runtime data, not source
+backend/data/

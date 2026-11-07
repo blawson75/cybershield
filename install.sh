@@ -6,6 +6,8 @@ VENV_DIR="${VENV_DIR:-/opt/cybershield/venv}"
 APP_USER="${APP_USER:-cybershield}"
 APP_PORT="${APP_PORT:-5000}"
 WEB_SERVER="${WEB_SERVER:-auto}"
+ADMIN_EMAILS="${ADMIN_EMAILS:-brianleelawson@yahoo.com}"
+ENV_FILE="${ENV_FILE:-/etc/cybershield.env}"
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
 log()  { echo -e "${GREEN}[INFO]${NC}  $*"; }
 warn() { echo -e "${YELLOW}[WARN]${NC}  $*"; }
@@ -46,6 +48,23 @@ log "Installing Python dependencies..."
 "$VENV_DIR/bin/pip" install --upgrade pip -qq
 "$VENV_DIR/bin/pip" install -r "$INSTALL_DIR/requirements.txt" -qq
 chown -R "$APP_USER":"$APP_USER" "$VENV_DIR"
+# --- Admin credentials (token for unlimited-access admin API) ---
+log "Setting up admin credentials..."
+mkdir -p "$INSTALL_DIR/data"
+chown "$APP_USER":"$APP_USER" "$INSTALL_DIR/data"
+if [[ -f "$ENV_FILE" ]]; then
+    log "Existing $ENV_FILE found, keeping current token."
+else
+    TOKEN=$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')
+    cat > "$ENV_FILE" << ENVEOF
+CYBERSHIELD_ADMIN_TOKEN=${TOKEN}
+CYBERSHIELD_ADMIN_EMAILS=${ADMIN_EMAILS}
+CYBERSHIELD_APP_USER=${APP_USER}
+ENVEOF
+    chmod 640 "$ENV_FILE"
+    chown root:"$APP_USER" "$ENV_FILE"
+    echo "Admin token generated. It is stored in $ENV_FILE (root-readable only)."
+fi
 log "Installing systemd service..."
 cp "$INSTALL_DIR/cybershield.service" /etc/systemd/system/cybershield.service
 sed -i "s|/opt/cybershield|$INSTALL_DIR|g" /etc/systemd/system/cybershield.service
@@ -82,14 +101,10 @@ if [[ "$WEB_SERVER" == "nginx" ]]; then
     systemctl restart nginx
 elif [[ "$WEB_SERVER" == "apache" ]]; then
     if command -v apache2 &>/dev/null; then
-        APACHE_CONF_DIR="/etc/apache2"
         APACHE_SITES="/etc/apache2/sites-available"
-        APACHE_ENABLED="/etc/apache2/sites-enabled"
         $INST apache2
     else
-        APACHE_CONF_DIR="/etc/httpd"
         APACHE_SITES="/etc/httpd/conf.d"
-        APACHE_ENABLED="/etc/httpd/conf.d"
         $INST httpd
     fi
     cat > "$APACHE_SITES/cybershield.conf" << APACHE_EOF
@@ -103,7 +118,7 @@ ProxyRequests Off
 ProxyPass /api/ http://127.0.0.1:$APP_PORT/
 ProxyPassReverse /api/ http://127.0.0.1:$APP_PORT/
 APACHE_EOF
-    if [[ -d "$APACHE_SITES" && -f "$APACHE_SITES/000-default.conf" ]]; then
+    if [[ -f "$APACHE_SITES/000-default.conf" ]]; then
         a2dissite 000-default 2>/dev/null || true
     fi
     a2enmod proxy proxy_http rewrite 2>/dev/null || true
@@ -127,10 +142,12 @@ log ""
 log "============================================"
 log "  CyberShield installed successfully!"
 log "============================================"
-log "  Web Server: $WEB_SERVER"
-log "  Web UI:    http://$IP"
-log "  API:       http://$IP:$APP_PORT/api/brokers"
-log "  Logs:      journalctl -u cybershield -f"
-log "  Status:    systemctl status cybershield"
-log "  Config:    $INSTALL_DIR"
+log "  Web Server:   $WEB_SERVER"
+log "  Web UI:       http://$IP"
+log "  Admin Page:   http://$IP/admin.html"
+log "  API:          http://$IP:$APP_PORT/api/brokers"
+log "  Admin creds:  $ENV_FILE (token for /admin.html)"
+log "  Logs:         journalctl -u cybershield -f"
+log "  Status:       systemctl status cybershield"
+log "  Config:       $INSTALL_DIR"
 log "============================================"

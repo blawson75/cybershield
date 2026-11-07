@@ -7,6 +7,7 @@ Type=simple
 User=cybershield
 Group=cybershield
 WorkingDirectory=/opt/cybershield
+EnvironmentFile=-/etc/cybershield.env
 Environment="PYTHONUNBUFFERED=1"
 ExecStart=/opt/cybershield/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:5000 --chdir backend app:app
 Restart=on-failure
